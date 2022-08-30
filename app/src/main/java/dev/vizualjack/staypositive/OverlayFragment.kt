@@ -1,20 +1,23 @@
 package dev.vizualjack.staypositive
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
-import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentOverlayBinding
-import org.w3c.dom.Attr
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
 
 
 /**
@@ -27,6 +30,7 @@ class OverlayFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private val CASH_FILE_NAME = "currentCash"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,10 +47,16 @@ class OverlayFragment : Fragment() {
         val activity = activity as MainActivity
         val linearLayout = view.findViewById<LinearLayout>(R.id.entriesWrapper)
 
-        for (entry in activity.entries) {
-            val view = OverlayEntryView(requireContext())
-            view.layout(0,0,0,0)
-            linearLayout.addView(view)
+        for ((index, entry) in activity.entries.withIndex()) {
+            val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_entry, null)
+            val textView = newEntry.findViewById<TextView>(R.id.overlay_entry_cashView)
+            textView.text = entry
+            newEntry.setOnClickListener {
+                val bundle = bundleOf("index" to index)
+                findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)
+            }
+            newEntry.setPadding(10,10,10,10)
+            linearLayout.addView(newEntry)
         }
 
         binding.cashEditBtn.setOnClickListener { view ->
@@ -57,7 +67,11 @@ class OverlayFragment : Fragment() {
             builder.setView(input)
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
-                    binding.cash.text = input.text.toString()
+                    val newCash = input.text.toString()
+                    binding.cash.text = newCash
+                    context?.openFileOutput(CASH_FILE_NAME, Context.MODE_PRIVATE).use {
+                        it?.write(newCash.toByteArray())
+                    }
                 })
             builder.setNegativeButton("Cancel",
                 DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
@@ -66,6 +80,15 @@ class OverlayFragment : Fragment() {
 
         binding.fab.setOnClickListener { view ->
             findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment)
+        }
+
+        val file = File(context?.filesDir, "currentCash")
+        if(!file.exists()) return
+        BufferedReader(FileReader(file)).useLines {
+            for (line in it.iterator()) {
+                binding.cash.text = line
+                break
+            }
         }
     }
 
