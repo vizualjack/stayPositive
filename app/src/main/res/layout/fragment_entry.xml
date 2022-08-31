@@ -4,29 +4,61 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".EntryFragment">
 
     <EditText
         android:id="@+id/entryText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="120dp"
+        android:background="@color/gray_600"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="100dp" />
+
+    <EditText
+        android:id="@+id/entryText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="176dp"
+        android:background="@color/gray_600"
         android:ems="10"
         android:inputType="numberDecimal"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="103dp" />
+        tools:layout_editor_absoluteX="100dp" />
+
+    <EditText
+        android:id="@+id/entryText3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="244dp"
+        android:background="@color/gray_600"
+        android:ems="10"
+        android:inputType="date"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="100dp" />
 
     <Button
         android:id="@+id/saveBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp"
+        android:layout_width="195dp"
+        android:layout_height="45dp"
+        android:layout_marginBottom="100dp"
+        android:backgroundTint="@color/gray_600"
         android:text="Save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/gray_600"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/entryText"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/entryText3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
