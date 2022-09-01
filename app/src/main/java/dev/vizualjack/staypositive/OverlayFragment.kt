@@ -15,6 +15,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentOverlayBinding
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -69,8 +70,11 @@ class OverlayFragment : Fragment() {
                 DialogInterface.OnClickListener { dialog, which ->
                     val newCash = input.text.toString()
                     binding.cash.text = "$newCash €"
+
+                    val dataJson = JSONObject()
+                    dataJson.put("cash", newCash)
                     context?.openFileOutput(CASH_FILE_NAME, Context.MODE_PRIVATE).use {
-                        it?.write(newCash.toByteArray())
+                        it?.write(dataJson.toString().toByteArray())
                     }
                 })
             builder.setNegativeButton("Cancel",
@@ -82,14 +86,11 @@ class OverlayFragment : Fragment() {
             findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment)
         }
 
-        val file = File(context?.filesDir, "currentCash")
+        val file = File(context?.filesDir, CASH_FILE_NAME)
         if(!file.exists()) return
-        BufferedReader(FileReader(file)).useLines {
-            for (line in it.iterator()) {
-                binding.cash.text = line
-                break
-            }
-        }
+        val jsonString = BufferedReader(FileReader(file)).readText()
+        val dataJson = JSONObject(jsonString)
+        binding.cash.text = "${dataJson.getString("cash")} €"
     }
 
     override fun onDestroyView() {
