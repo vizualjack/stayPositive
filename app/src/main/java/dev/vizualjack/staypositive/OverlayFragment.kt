@@ -59,7 +59,7 @@ class OverlayFragment : Fragment() {
             linearLayout.addView(newEntry)
         }
 
-        binding.cashEditBtn.setOnClickListener { view ->
+        binding.cash.setOnClickListener { view ->
             val builder = AlertDialog.Builder(context)
             builder.setTitle("New today cash")
             val input = EditText(context)
@@ -68,7 +68,7 @@ class OverlayFragment : Fragment() {
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
                     val newCash = input.text.toString()
-                    binding.cash.text = newCash
+                    binding.cash.text = "$newCash €"
                     context?.openFileOutput(CASH_FILE_NAME, Context.MODE_PRIVATE).use {
                         it?.write(newCash.toByteArray())
                     }

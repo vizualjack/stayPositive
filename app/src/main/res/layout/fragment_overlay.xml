@@ -46,16 +46,4 @@
             android:layout_marginHorizontal="5dp"/>
     </ScrollView>
 
-    <Button
-        android:id="@+id/cashEditBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="27dp"
-        android:layout_marginBottom="8dp"
-        android:text="change"
-        app:layout_constraintBottom_toTopOf="@+id/entries"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/cash"
-        app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

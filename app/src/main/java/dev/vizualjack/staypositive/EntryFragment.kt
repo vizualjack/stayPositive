@@ -1,11 +1,16 @@
 package dev.vizualjack.staypositive
 
+import android.animation.ObjectAnimator
+import android.app.DatePickerDialog
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentEntryBinding
 
@@ -30,19 +35,44 @@ class EntryFragment : Fragment() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val activity = activity as MainActivity
         binding.saveBtn.setOnClickListener {
-            if (selectedIndex == -1) activity.entries.add(binding.entryText.text.toString())
-            else activity.entries[selectedIndex] = binding.entryText.text.toString()
+            if (selectedIndex == -1) activity.entries.add(binding.name.text.toString())
+            else activity.entries[selectedIndex] = binding.name.text.toString()
             findNavController().navigate(R.id.action_EntryFragment_to_OverlayFragment)
         }
+        binding.date.setOnClickListener {
+            val datePicker = DatePickerDialog(requireContext())
+            datePicker.setOnDateSetListener { datePicker, year, month, day ->
+                binding.date.text = "${datePicker.dayOfMonth}.${datePicker.month}.${datePicker.year}"
+            }
+            datePicker.show()
+        }
+        ArrayAdapter.createFromResource(requireContext(), R.array.entry_type, R.layout.spinner_item)
+            .also { adapter ->
+                adapter.setDropDownViewResource(R.layout.spinner_item)
+                binding.spinner.adapter = adapter
+            }
+
+        binding.value.setOnFocusChangeListener { view, b ->
+//            println("focus: $b")
+//            println("moovin")
+//            binding.textView.translationX += 5
+
+            ObjectAnimator.ofFloat(activity.findViewById(R.id.valueText), "translationX", 100f).apply {
+                duration = 2000
+                start()
+            }
+        }
+
         if(arguments != null)
             selectedIndex = arguments!!.getInt("index", -1)
         println(selectedIndex)
         if (selectedIndex == -1) return
-        binding.entryText.text.insert(0,activity.entries[selectedIndex])
+        binding.name.text.insert(0,activity.entries[selectedIndex])
     }
 
     override fun onDestroyView() {
