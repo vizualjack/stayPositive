@@ -3,11 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/android/StayPositive/app/src/main/res/drawable/layout_bg.xml" value="0.2645" />
         <entry key="..\:/android/StayPositive/app/src/main/res/layout/activity_main.xml" value="0.31068840579710144" />
         <entry key="..\:/android/StayPositive/app/src/main/res/layout/content_main.xml" value="0.31068840579710144" />
-        <entry key="..\:/android/StayPositive/app/src/main/res/layout/fragment_entry.xml" value="0.33" />
+        <entry key="..\:/android/StayPositive/app/src/main/res/layout/fragment_entry.xml" value="0.5" />
         <entry key="..\:/android/StayPositive/app/src/main/res/layout/fragment_overlay.xml" value="0.22" />
         <entry key="..\:/android/StayPositive/app/src/main/res/layout/fragment_overlay_entry.xml" value="0.19429347826086957" />
+        <entry key="..\:/android/StayPositive/app/src/main/res/layout/input_background.xml" value="0.37083333333333335" />
+        <entry key="..\:/android/StayPositive/app/src/main/res/layout/sample_my_view.xml" value="0.3578125" />
         <entry key="..\:/android/StayPositive/app/src/main/res/layout/sample_overlay_entry.xml" value="0.19429347826086957" />
         <entry key="..\:/android/StayPositive/app/src/main/res/layout/spinner_item.xml" value="0.19429347826086957" />
       </map>

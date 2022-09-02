@@ -51,7 +51,7 @@ class OverlayFragment : Fragment() {
         for ((index, entry) in activity.entries.withIndex()) {
             val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_entry, null)
             val textView = newEntry.findViewById<TextView>(R.id.overlay_entry_cashView)
-            textView.text = entry
+            textView.text = entry.name
             newEntry.setOnClickListener {
                 val bundle = bundleOf("index" to index)
                 findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)

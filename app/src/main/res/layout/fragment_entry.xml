@@ -7,63 +7,135 @@
     android:background="@color/black"
     tools:context=".EntryFragment">
 
-    <EditText
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="120dp"
-        android:background="@color/gray_600"
-        android:ems="10"
-        android:inputType="text"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nameWrapper"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:background="@drawable/layout_bg"
+        android:layout_marginTop="128dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+        <TextView
+            android:id="@+id/nameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="fuuuuuuuuck you"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:inputType="text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <TextView
-        android:id="@+id/valueText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="24dp"
-        android:text="I'm moooovin"
-        android:textColor="@color/white"
-        app:layout_constraintEnd_toStartOf="@+id/value"
-        app:layout_constraintTop_toBottomOf="@+id/name" />
-
-    <EditText
-        android:id="@+id/value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="@color/gray_600"
-        android:ems="10"
-        android:inputType="numberSigned|numberDecimal"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/valueWrapper"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/layout_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name" />
+        app:layout_constraintTop_toTopOf="@id/nameWrapper">
+        <TextView
+            android:id="@+id/valueText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I'm moooovin"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/value"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:inputType="numberSigned|numberDecimal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="@color/gray_600"
-        android:text="Select date"
-        android:ems="10"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dateWrapper"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/layout_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/value" />
+        app:layout_constraintTop_toTopOf="@id/valueWrapper">
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DAAAAAATE"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:ems="10"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Spinner
-        android:id="@+id/spinner"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/typeWrapper"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/layout_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/date" />
+        app:layout_constraintTop_toTopOf="@id/dateWrapper">
+
+        <Spinner
+            android:id="@+id/type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
         android:id="@+id/saveBtn"
