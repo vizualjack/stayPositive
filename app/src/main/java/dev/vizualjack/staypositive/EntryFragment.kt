@@ -36,10 +36,8 @@ class EntryFragment : Fragment() {
     ): View? {
         _binding = FragmentEntryBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val activity = activity as MainActivity
@@ -58,7 +56,8 @@ class EntryFragment : Fragment() {
         binding.date.setOnClickListener {
             val datePicker = DatePickerDialog(requireContext())
             datePicker.setOnDateSetListener { datePicker, year, month, day ->
-                binding.date.text = "${datePicker.dayOfMonth}.${datePicker.month+1}.${datePicker.year}"
+                val localDate = LocalDate.of(datePicker.year,datePicker.month+1,datePicker.dayOfMonth)
+                binding.date.text = Util.toNiceString(localDate)
                 changeYpos(R.id.dateText, -30f)
             }
             datePicker.show()
@@ -72,7 +71,6 @@ class EntryFragment : Fragment() {
             if (binding.name.text.isEmpty() ||
                 binding.value.text.isEmpty() ||
                 binding.date.text.isEmpty()) return@setOnClickListener
-
             var entry: Entry? = null
             if (selectedIndex != -1) entry = activity.entries[selectedIndex]
             if (entry == null) entry = Entry(null,null, null,null)
@@ -94,22 +92,20 @@ class EntryFragment : Fragment() {
             activity.entries.removeAt(selectedIndex)
             findNavController().navigate(R.id.action_EntryFragment_to_OverlayFragment)
         }
-//        binding.name.text.insert(0,activity.entries[selectedIndex])
-//        Fill components with selected entry values
         val entry = activity.entries[selectedIndex]
         binding.name.text.insert(0, entry.name)
         changeYpos(R.id.nameText, -30f)
-        binding.value.text.insert(0, entry.value.toString())
+        binding.value.text.insert(0, Util.toNiceString(entry.value!!, false))
         changeYpos(R.id.valueText, -30f)
         val time = entry.startTime!!
-        binding.date.text = "${time.dayOfMonth!!}.${time.monthValue}.${time.year}"
+        binding.date.text = Util.toNiceString(time)
         changeYpos(R.id.dateText, -30f)
         binding.type.setSelection(entry.type!!.ordinal)
     }
 
     fun changeYpos(id: Int, newY: Float) {
         ObjectAnimator.ofFloat(requireActivity().findViewById(id), "translationY", newY).apply {
-            duration = 1000
+            duration = 500
             start()
         }
     }

@@ -1,5 +1,6 @@
 package dev.vizualjack.staypositive
 
+import android.app.ActionBar
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -12,6 +13,8 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.os.bundleOf
+import androidx.core.view.marginTop
+import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentOverlayBinding
@@ -36,29 +39,41 @@ class OverlayFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         _binding = FragmentOverlayBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val activity = activity as MainActivity
         val linearLayout = view.findViewById<LinearLayout>(R.id.entriesWrapper)
-
         for ((index, entry) in activity.entries.withIndex()) {
             val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_entry, null)
-            val textView = newEntry.findViewById<TextView>(R.id.overlay_entry_cashView)
-            textView.text = entry.name
+            val nameView = newEntry.findViewById<TextView>(R.id.overlay_entry_nameView)
+            val dateView = newEntry.findViewById<TextView>(R.id.overlay_entry_dateView)
+            val cashView = newEntry.findViewById<TextView>(R.id.overlay_entry_cashView)
+            nameView.text = entry.name
+            val time = entry.startTime!!
+            dateView.text = Util.toNiceString(time)
+            var cashViewText = Util.toNiceString(entry.value!!, true)
+            var preSign = "+"
+            var colorId = R.color.green
+            if (entry.value!! < 0f) {
+                preSign = "-"
+                colorId = R.color.red
+            }
+            cashView.text = "$preSign $cashViewText €"
+            cashView.setTextColor(resources.getColor(colorId, null))
             newEntry.setOnClickListener {
                 val bundle = bundleOf("index" to index)
                 findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)
             }
-            newEntry.setPadding(10,10,10,10)
             linearLayout.addView(newEntry)
+            newEntry.layoutParams.height = 100 * requireContext().resources.displayMetrics.density.toInt()
+            val marginLayout = newEntry.layoutParams as ViewGroup.MarginLayoutParams
+            marginLayout.setMargins(30)
         }
-        binding.cash.text = "${activity.todayCash} €"
+        binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
         binding.cash.setOnClickListener { view ->
             val builder = AlertDialog.Builder(context)
             builder.setTitle("New today cash")
@@ -68,14 +83,13 @@ class OverlayFragment : Fragment() {
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
                     activity.todayCash = input.text.toString().toFloat()
-                    binding.cash.text = "${activity.todayCash} €"
+                    binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
                     activity.save()
                 })
             builder.setNegativeButton("Cancel",
                 DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
             builder.show()
         }
-
         binding.fab.setOnClickListener { view ->
             findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment)
         }

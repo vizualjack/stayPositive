@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".OverlayFragment">
+    tools:context=".OverlayFragment"
+    android:background="@color/dark_gray">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -23,7 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="3 000,73 €"
-        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,7 +38,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cash">
+        app:layout_constraintTop_toBottomOf="@id/cash"
+        android:background="@color/black">
 
         <LinearLayout
             android:id="@+id/entriesWrapper"
