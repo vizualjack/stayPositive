@@ -31,7 +31,6 @@ class OverlayFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private val CASH_FILE_NAME = "currentCash"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,7 +58,7 @@ class OverlayFragment : Fragment() {
             newEntry.setPadding(10,10,10,10)
             linearLayout.addView(newEntry)
         }
-
+        binding.cash.text = "${activity.todayCash} €"
         binding.cash.setOnClickListener { view ->
             val builder = AlertDialog.Builder(context)
             builder.setTitle("New today cash")
@@ -68,13 +67,9 @@ class OverlayFragment : Fragment() {
             builder.setView(input)
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
-                    val newCash = input.text.toString()
-                    binding.cash.text = "$newCash €"
-                    val dataJson = JSONObject()
-                    dataJson.put("cash", newCash)
-                    context?.openFileOutput(CASH_FILE_NAME, Context.MODE_PRIVATE).use {
-                        it?.write(dataJson.toString().toByteArray())
-                    }
+                    activity.todayCash = input.text.toString().toFloat()
+                    binding.cash.text = "${activity.todayCash} €"
+                    activity.save()
                 })
             builder.setNegativeButton("Cancel",
                 DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
@@ -84,12 +79,6 @@ class OverlayFragment : Fragment() {
         binding.fab.setOnClickListener { view ->
             findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment)
         }
-
-        val file = File(context?.filesDir, CASH_FILE_NAME)
-        if(!file.exists()) return
-        val jsonString = BufferedReader(FileReader(file)).readText()
-        val dataJson = JSONObject(jsonString)
-        binding.cash.text = "${dataJson.getString("cash")} €"
     }
 
     override fun onDestroyView() {

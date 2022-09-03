@@ -83,6 +83,7 @@ class EntryFragment : Fragment() {
             val date = LocalDate.of(cuttedDate[2].toInt(), cuttedDate[1].toInt(), cuttedDate[0].toInt())
             entry.startTime = date
             if (selectedIndex == -1) activity.entries.add(entry)
+            activity.save()
             findNavController().navigate(R.id.action_EntryFragment_to_OverlayFragment)
         }
         if(arguments != null)
