@@ -47,28 +47,19 @@ class EntryFragment : Fragment() {
             var value = 0f
             val filled = activity.findViewById<EditText>(R.id.name).text.toString().isNotEmpty()
             if (focus || filled) value = -30f
-            ObjectAnimator.ofFloat(activity.findViewById(R.id.nameText), "translationY", value).apply {
-                duration = 1000
-                start()
-            }
+            changeYpos(R.id.nameText, value)
         }
         binding.value.setOnFocusChangeListener { view, focus ->
             var value = 0f
             val filled = activity.findViewById<EditText>(R.id.value).text.toString().isNotEmpty()
             if (focus || filled) value = -30f
-            ObjectAnimator.ofFloat(activity.findViewById(R.id.valueText), "translationY", value).apply {
-                duration = 1000
-                start()
-            }
+            changeYpos(R.id.valueText, value)
         }
         binding.date.setOnClickListener {
             val datePicker = DatePickerDialog(requireContext())
             datePicker.setOnDateSetListener { datePicker, year, month, day ->
-                binding.date.text = "${datePicker.dayOfMonth}.${datePicker.month}.${datePicker.year}"
-                ObjectAnimator.ofFloat(activity.findViewById(R.id.dateText), "translationY", -30f).apply {
-                    duration = 1000
-                    start()
-                }
+                binding.date.text = "${datePicker.dayOfMonth}.${datePicker.month+1}.${datePicker.year}"
+                changeYpos(R.id.dateText, -30f)
             }
             datePicker.show()
         }
@@ -84,21 +75,42 @@ class EntryFragment : Fragment() {
 
             var entry: Entry? = null
             if (selectedIndex != -1) entry = activity.entries[selectedIndex]
-            if (entry == null) entry = Entry(null,null,null,null)
+            if (entry == null) entry = Entry(null,null, null,null)
             entry.name = binding.name.text.toString()
             entry.value = binding.value.text.toString().toFloat()
             entry.type = EntryType.values()[binding.type.selectedItemPosition]
             val cuttedDate = binding.date.text.toString().split('.')
-            val date = LocalDate.of(cuttedDate[2].toInt(), cuttedDate[1].toInt()+1, cuttedDate[0].toInt())
+            val date = LocalDate.of(cuttedDate[2].toInt(), cuttedDate[1].toInt(), cuttedDate[0].toInt())
             entry.startTime = date
-            activity.entries.add(entry)
+            if (selectedIndex == -1) activity.entries.add(entry)
             findNavController().navigate(R.id.action_EntryFragment_to_OverlayFragment)
         }
         if(arguments != null)
             selectedIndex = arguments!!.getInt("index", -1)
         if (selectedIndex == -1) return
+        binding.deleteBtn.alpha = 1f
+        binding.deleteBtn.setOnClickListener {
+            activity.entries.removeAt(selectedIndex)
+            findNavController().navigate(R.id.action_EntryFragment_to_OverlayFragment)
+        }
 //        binding.name.text.insert(0,activity.entries[selectedIndex])
 //        Fill components with selected entry values
+        val entry = activity.entries[selectedIndex]
+        binding.name.text.insert(0, entry.name)
+        changeYpos(R.id.nameText, -30f)
+        binding.value.text.insert(0, entry.value.toString())
+        changeYpos(R.id.valueText, -30f)
+        val time = entry.startTime!!
+        binding.date.text = "${time.dayOfMonth!!}.${time.monthValue}.${time.year}"
+        changeYpos(R.id.dateText, -30f)
+        binding.type.setSelection(entry.type!!.ordinal)
+    }
+
+    fun changeYpos(id: Int, newY: Float) {
+        ObjectAnimator.ofFloat(requireActivity().findViewById(id), "translationY", newY).apply {
+            duration = 1000
+            start()
+        }
     }
 
     override fun onDestroyView() {

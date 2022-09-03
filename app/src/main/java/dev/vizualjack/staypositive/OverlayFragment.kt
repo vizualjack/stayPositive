@@ -70,7 +70,6 @@ class OverlayFragment : Fragment() {
                 DialogInterface.OnClickListener { dialog, which ->
                     val newCash = input.text.toString()
                     binding.cash.text = "$newCash €"
-
                     val dataJson = JSONObject()
                     dataJson.put("cash", newCash)
                     context?.openFileOutput(CASH_FILE_NAME, Context.MODE_PRIVATE).use {
