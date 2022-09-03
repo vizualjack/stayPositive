@@ -2,21 +2,20 @@ package dev.vizualjack.staypositive
 
 import android.animation.ObjectAnimator
 import android.app.DatePickerDialog
-import android.os.Build
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentEntryBinding
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.temporal.TemporalField
-import java.util.Calendar
+
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -54,6 +53,7 @@ class EntryFragment : Fragment() {
             changeYpos(R.id.valueText, value)
         }
         binding.date.setOnClickListener {
+            hideKeyboard()
             val datePicker = DatePickerDialog(requireContext())
             datePicker.setOnDateSetListener { datePicker, year, month, day ->
                 val localDate = LocalDate.of(datePicker.year,datePicker.month+1,datePicker.dayOfMonth)
@@ -61,6 +61,10 @@ class EntryFragment : Fragment() {
                 changeYpos(R.id.dateText, -30f)
             }
             datePicker.show()
+        }
+        binding.type.setOnTouchListener { view, motionEvent ->
+            hideKeyboard()
+            view.performClick()
         }
         ArrayAdapter(requireContext(), R.layout.spinner_item, EntryType.values())
             .also { adapter ->
@@ -101,6 +105,12 @@ class EntryFragment : Fragment() {
         binding.date.text = Util.toNiceString(time)
         changeYpos(R.id.dateText, -30f)
         binding.type.setSelection(entry.type!!.ordinal)
+    }
+
+    fun hideKeyboard() {
+        requireView().findFocus()
+        val imm: InputMethodManager? = getSystemService(requireContext(), InputMethodManager::class.java)
+        imm!!.hideSoftInputFromWindow(requireView().windowToken, 0)
     }
 
     fun changeYpos(id: Int, newY: Float) {

@@ -5,7 +5,7 @@ import java.time.LocalDate
 class Util {
     companion object {
         fun toNiceString(value: Float, withSpaces: Boolean): String {
-            var asString = value.toString()
+            var asString = value.toString().replace("-", "").replace("+", "")
             var pointIndex = asString.indexOf('.')
             if (pointIndex == -1) pointIndex = asString.indexOf(',')
             // following 0
