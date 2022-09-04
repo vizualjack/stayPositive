@@ -87,7 +87,6 @@ class PaymentFragment : Fragment() {
             if (activity.payments.size > 1)
                 activity.payments = PaymentUtil.sortPayments(activity.payments).toList() as ArrayList<Payment>
             activity.save()
-//            findNavController().navigate(R.id.action_EntryFragment_to_OverlayFragment)
             findNavController().navigateUp()
         }
         if(arguments != null)

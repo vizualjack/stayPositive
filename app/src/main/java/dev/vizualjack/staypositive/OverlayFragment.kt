@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.os.bundleOf
+import androidx.core.view.get
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -29,6 +30,10 @@ class OverlayFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private var timelineEntries = ArrayList<PaymentTimelineEntry>()
+    private var entryHeight = 0
+    private var previousIndex = 0
+    private var isLoadingMore = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +45,7 @@ class OverlayFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        timelineEntries.clear()
         load()
     }
 
@@ -48,10 +54,9 @@ class OverlayFragment : Fragment() {
         GlobalScope.launch(Dispatchers.IO) {
             activity.todayCash = PaymentUtil.calculatePast(activity.payments, activity.todayCash)
             activity.save()
-            val timelineEntries = PaymentUtil.createPaymentTimeline(activity.payments, LocalDate.now().withDayOfMonth(2),20)
+            loadMore()
             withContext(Dispatchers.Main) {
                 binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
-                putEntriesInWrapper(timelineEntries)
             }
         }
         binding.cash.setOnClickListener { view ->
@@ -74,11 +79,47 @@ class OverlayFragment : Fragment() {
         binding.fab.setOnClickListener { view ->
             findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment)
         }
+        binding.entries.setOnScrollChangeListener { view, i, currentHeight, i3, previousHeight ->
+            val linearLayout = requireView().findViewById<LinearLayout>(R.id.entriesWrapper)
+            if (entryHeight == 0) {
+                val firstEntry = linearLayout.get(0)
+                entryHeight = firstEntry.height
+                val marginLayout = firstEntry.layoutParams as ViewGroup.MarginLayoutParams
+                entryHeight += marginLayout.topMargin + marginLayout.bottomMargin
+            }
+            val currentIndex = currentHeight / entryHeight
+            val triggerHeight = linearLayout.height - (view.height*2)
+            if (currentHeight >= triggerHeight) loadMore()
+            if(currentIndex == previousIndex) return@setOnScrollChangeListener
+            previousIndex = currentIndex
+            var cash = activity.todayCash
+            for (i in 0 until currentIndex) {
+                cash += timelineEntries[i].payment.value!!
+            }
+            binding.cash.text = "${Util.toNiceString(cash, true)} €"
+        }
     }
 
-    private fun putEntriesInWrapper(timelineEntries: List<PaymentTimelineEntry>) {
+    private fun loadMore() {
+        if (isLoadingMore) return
+        isLoadingMore = true
         val activity = activity as MainActivity
-        val linearLayout = requireView().findViewById<LinearLayout>(R.id.entriesWrapper)
+        GlobalScope.launch(Dispatchers.IO) {
+            var localDate = LocalDate.now().withDayOfMonth(2)
+            if (timelineEntries.size > 0) localDate = timelineEntries.last().currentTime.plusDays(1)
+            val newEntries = PaymentUtil.createPaymentTimeline(activity.payments, localDate,20)
+            timelineEntries.addAll(newEntries)
+            val newViews = viewsForTimelineEntries(newEntries)
+            withContext(Dispatchers.Main) {
+                putEntriesInWrapper(newViews)
+                isLoadingMore = false
+            }
+        }
+    }
+
+    private fun viewsForTimelineEntries(timelineEntries: List<PaymentTimelineEntry>): List<View> {
+        val activity = activity as MainActivity
+        val views = ArrayList<View>()
         for (timelineEntry in timelineEntries) {
             val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_payment, null)
             val nameView = newEntry.findViewById<TextView>(R.id.overlay_entry_nameView)
@@ -101,9 +142,17 @@ class OverlayFragment : Fragment() {
                 val bundle = bundleOf("index" to index)
                 findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)
             }
-            linearLayout.addView(newEntry)
-            newEntry.layoutParams.height = 100 * requireContext().resources.displayMetrics.density.toInt()
-            val marginLayout = newEntry.layoutParams as ViewGroup.MarginLayoutParams
+            views.add(newEntry)
+        }
+        return views
+    }
+
+    private fun putEntriesInWrapper(views: List<View>) {
+        val linearLayout = requireView().findViewById<LinearLayout>(R.id.entriesWrapper)
+        for (view in views) {
+            linearLayout.addView(view)
+            view.layoutParams.height = 100 * requireContext().resources.displayMetrics.density.toInt()
+            val marginLayout = view.layoutParams as ViewGroup.MarginLayoutParams
             marginLayout.setMargins(30)
         }
     }
