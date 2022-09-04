@@ -1,17 +1,12 @@
 package dev.vizualjack.staypositive
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import androidx.annotation.RequiresApi
 import dev.vizualjack.staypositive.databinding.ActivityMainBinding
 import org.json.JSONArray
 import org.json.JSONObject
@@ -26,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     public var todayCash = 0f
-    public var entries = ArrayList<Entry>()
+    public var payments = ArrayList<Payment>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,19 +45,19 @@ class MainActivity : AppCompatActivity() {
             val jsonEntry = jsonEntries.getJSONObject(i)
             val name = jsonEntry.getString("name")
             val value = jsonEntry.getString("value").toFloat()
-            val startTime = LocalDate.parse(jsonEntry.getString("startTime"))
-            val type = EntryType.values()[jsonEntry.getInt("type")]
-            entries.add(Entry(name, value, startTime, type))
+            val nextTime = LocalDate.parse(jsonEntry.getString("nextTime"))
+            val type = PaymentType.values()[jsonEntry.getInt("type")]
+            payments.add(Payment(name, value, nextTime, type))
         }
     }
 
     public fun save() {
         val entryArray = JSONArray()
-        for (entry in entries) {
+        for (entry in payments) {
             val arrayEntry = JSONObject()
             arrayEntry.put("name", entry.name)
             arrayEntry.put("value", entry.value)
-            arrayEntry.put("startTime", entry.startTime)
+            arrayEntry.put("nextTime", entry.nextTime)
             arrayEntry.put("type", entry.type!!.ordinal)
             entryArray.put(arrayEntry)
         }

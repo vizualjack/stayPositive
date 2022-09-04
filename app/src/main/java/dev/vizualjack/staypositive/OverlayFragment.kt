@@ -1,8 +1,6 @@
 package dev.vizualjack.staypositive
 
-import android.app.ActionBar
 import android.app.AlertDialog
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
@@ -13,15 +11,12 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.os.bundleOf
-import androidx.core.view.marginTop
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentOverlayBinding
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
+import kotlinx.coroutines.*
+import java.time.LocalDate
 
 
 /**
@@ -45,35 +40,20 @@ class OverlayFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        load()
+    }
+
+    private fun load() {
         val activity = activity as MainActivity
-        val linearLayout = view.findViewById<LinearLayout>(R.id.entriesWrapper)
-        for ((index, entry) in activity.entries.withIndex()) {
-            val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_entry, null)
-            val nameView = newEntry.findViewById<TextView>(R.id.overlay_entry_nameView)
-            val dateView = newEntry.findViewById<TextView>(R.id.overlay_entry_dateView)
-            val cashView = newEntry.findViewById<TextView>(R.id.overlay_entry_cashView)
-            nameView.text = entry.name
-            val time = entry.startTime!!
-            dateView.text = Util.toNiceString(time)
-            var cashViewText = Util.toNiceString(entry.value!!, true)
-            var preSign = "+"
-            var colorId = R.color.green
-            if (entry.value!! < 0f) {
-                preSign = "-"
-                colorId = R.color.red
+        GlobalScope.launch(Dispatchers.IO) {
+            activity.todayCash = PaymentUtil.calculatePast(activity.payments, activity.todayCash)
+            activity.save()
+            val timelineEntries = PaymentUtil.createPaymentTimeline(activity.payments, LocalDate.now().withDayOfMonth(2),20)
+            withContext(Dispatchers.Main) {
+                binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
+                putEntriesInWrapper(timelineEntries)
             }
-            cashView.text = "$preSign $cashViewText €"
-            cashView.setTextColor(resources.getColor(colorId, null))
-            newEntry.setOnClickListener {
-                val bundle = bundleOf("index" to index)
-                findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)
-            }
-            linearLayout.addView(newEntry)
-            newEntry.layoutParams.height = 100 * requireContext().resources.displayMetrics.density.toInt()
-            val marginLayout = newEntry.layoutParams as ViewGroup.MarginLayoutParams
-            marginLayout.setMargins(30)
         }
-        binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
         binding.cash.setOnClickListener { view ->
             val builder = AlertDialog.Builder(context)
             builder.setTitle("New today cash")
@@ -82,6 +62,7 @@ class OverlayFragment : Fragment() {
             builder.setView(input)
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
+                    if(input.text.isEmpty()) return@OnClickListener
                     activity.todayCash = input.text.toString().toFloat()
                     binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
                     activity.save()
@@ -92,6 +73,38 @@ class OverlayFragment : Fragment() {
         }
         binding.fab.setOnClickListener { view ->
             findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment)
+        }
+    }
+
+    private fun putEntriesInWrapper(timelineEntries: List<PaymentTimelineEntry>) {
+        val activity = activity as MainActivity
+        val linearLayout = requireView().findViewById<LinearLayout>(R.id.entriesWrapper)
+        for (timelineEntry in timelineEntries) {
+            val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_payment, null)
+            val nameView = newEntry.findViewById<TextView>(R.id.overlay_entry_nameView)
+            val dateView = newEntry.findViewById<TextView>(R.id.overlay_entry_dateView)
+            val cashView = newEntry.findViewById<TextView>(R.id.overlay_entry_cashView)
+            nameView.text = timelineEntry.payment.name
+            val time = timelineEntry.currentTime
+            dateView.text = Util.toNiceString(time)
+            var cashViewText = Util.toNiceString(timelineEntry.payment.value!!, true)
+            var preSign = "+"
+            var colorId = R.color.green
+            if (timelineEntry.payment.value!! < 0f) {
+                preSign = "-"
+                colorId = R.color.red
+            }
+            cashView.text = "$preSign $cashViewText €"
+            cashView.setTextColor(resources.getColor(colorId, null))
+            newEntry.setOnClickListener {
+                val index = activity.payments.indexOf(timelineEntry.payment)
+                val bundle = bundleOf("index" to index)
+                findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)
+            }
+            linearLayout.addView(newEntry)
+            newEntry.layoutParams.height = 100 * requireContext().resources.displayMetrics.density.toInt()
+            val marginLayout = newEntry.layoutParams as ViewGroup.MarginLayoutParams
+            marginLayout.setMargins(30)
         }
     }
 

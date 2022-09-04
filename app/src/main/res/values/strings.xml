@@ -3,7 +3,7 @@
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
     <string name="overlay_fragment_label">Overview</string>
-    <string name="entry_fragment_label">Entry</string>
+    <string name="payment_fragment_label">Payment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 

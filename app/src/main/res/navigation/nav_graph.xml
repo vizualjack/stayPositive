@@ -17,9 +17,9 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="dev.vizualjack.staypositive.EntryFragment"
-        android:label="@string/entry_fragment_label"
-        tools:layout="@layout/fragment_entry">
+        android:name="dev.vizualjack.staypositive.PaymentFragment"
+        android:label="@string/payment_fragment_label"
+        tools:layout="@layout/fragment_payment">
 
         <action
             android:id="@+id/action_EntryFragment_to_OverlayFragment"

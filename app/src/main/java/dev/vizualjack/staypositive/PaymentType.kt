@@ -1,5 +1,5 @@
 package dev.vizualjack.staypositive
 
-enum class EntryType {
+enum class PaymentType {
     ONES, MONTHLY
 }
