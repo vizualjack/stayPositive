@@ -96,7 +96,9 @@ class OverlayFragment : Fragment() {
             for (i in 0 until currentIndex) {
                 cash += timelineEntries[i].payment.value!!
             }
-            binding.cash.text = "${Util.toNiceString(cash, true)} €"
+            var cashText =  "${Util.toNiceString(cash, true)} €"
+            if (cash < 0) cashText = "- ${cashText}"
+            binding.cash.text = cashText
         }
     }
 
