@@ -62,7 +62,7 @@ class PaymentUtil {
         }
 
         fun calculatePast(payments: ArrayList<Payment>, todayCash: Float): Float {
-            val now = LocalDate.now().withDayOfMonth(2)
+            val now = LocalDate.now()
             val finishedPayments = ArrayList<Payment>()
             var newCash = todayCash
             for (payment in payments) {

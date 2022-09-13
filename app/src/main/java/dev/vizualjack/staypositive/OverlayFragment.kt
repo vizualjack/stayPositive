@@ -107,7 +107,7 @@ class OverlayFragment : Fragment() {
         isLoadingMore = true
         val activity = activity as MainActivity
         GlobalScope.launch(Dispatchers.IO) {
-            var localDate = LocalDate.now().withDayOfMonth(2)
+            var localDate = LocalDate.now()
             if (timelineEntries.size > 0) localDate = timelineEntries.last().currentTime.plusDays(1)
             val newEntries = PaymentUtil.createPaymentTimeline(activity.payments, localDate,20)
             timelineEntries.addAll(newEntries)
