@@ -8,14 +8,35 @@
     tools:context=".PaymentFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/typeWrapper"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="128dp"
+        android:background="@drawable/layout_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <Spinner
+            android:id="@+id/type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nameWrapper"
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:background="@drawable/layout_bg"
-        android:layout_marginTop="128dp"
+        android:layout_marginTop="64dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="@id/typeWrapper">
         <TextView
             android:id="@+id/nameText"
             android:layout_width="wrap_content"
@@ -118,20 +139,36 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/typeWrapper"
+        android:id="@+id/endDateWrapper"
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:layout_marginTop="64dp"
         android:background="@drawable/layout_bg"
+        android:textColor="@color/gray_400"
+        android:alpha="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/dateWrapper">
-        <Spinner
-            android:id="@+id/type"
+        <TextView
+            android:id="@+id/endDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter end month"
+            android:textColor="@color/gray_400"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/endDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

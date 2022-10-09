@@ -46,8 +46,12 @@ class MainActivity : AppCompatActivity() {
             val name = jsonEntry.getString("name")
             val value = jsonEntry.getString("value").toFloat()
             val nextTime = LocalDate.parse(jsonEntry.getString("nextTime"))
+            var lastTime: LocalDate? = null
+            val lastTimeString = jsonEntry.getString("lastTime")
+            if (lastTimeString != null)
+                lastTime = LocalDate.parse(lastTimeString)
             val type = PaymentType.values()[jsonEntry.getInt("type")]
-            payments.add(Payment(name, value, nextTime, type))
+            payments.add(Payment(name, value, nextTime, lastTime, type))
         }
     }
 
@@ -58,6 +62,7 @@ class MainActivity : AppCompatActivity() {
             arrayEntry.put("name", entry.name)
             arrayEntry.put("value", entry.value)
             arrayEntry.put("nextTime", entry.nextTime)
+            arrayEntry.put("lastTime", entry.lastTime)
             arrayEntry.put("type", entry.type!!.ordinal)
             entryArray.put(arrayEntry)
         }

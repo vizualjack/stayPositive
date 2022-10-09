@@ -52,11 +52,13 @@ class OverlayFragment : Fragment() {
     private fun load() {
         val activity = activity as MainActivity
         GlobalScope.launch(Dispatchers.IO) {
-            activity.todayCash = PaymentUtil.calculatePast(activity.payments, activity.todayCash)
+            activity.todayCash = PaymentUtil.calculateTillDate(LocalDate.now(), activity.payments, activity.todayCash, false)
             activity.save()
             loadMore()
             withContext(Dispatchers.Main) {
-                binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
+                var cashText =  "${Util.toNiceString(activity.todayCash, true)} €"
+                if (activity.todayCash < 0) cashText = "- ${cashText}"
+                binding.cash.text = cashText
             }
         }
         binding.cash.setOnClickListener { view ->
