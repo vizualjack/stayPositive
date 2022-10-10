@@ -47,9 +47,8 @@ class MainActivity : AppCompatActivity() {
             val value = jsonEntry.getString("value").toFloat()
             val nextTime = LocalDate.parse(jsonEntry.getString("nextTime"))
             var lastTime: LocalDate? = null
-            val lastTimeString = jsonEntry.getString("lastTime")
-            if (lastTimeString != null)
-                lastTime = LocalDate.parse(lastTimeString)
+            if (jsonEntry.has("lastTime"))
+                lastTime = LocalDate.parse(jsonEntry.getString("lastTime"))
             val type = PaymentType.values()[jsonEntry.getInt("type")]
             payments.add(Payment(name, value, nextTime, lastTime, type))
         }

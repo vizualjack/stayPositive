@@ -17,6 +17,10 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.vizualjack.staypositive.databinding.FragmentPaymentBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 
@@ -43,6 +47,7 @@ class PaymentFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private var selectedIndex = -1
+    private var saving = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -100,7 +105,7 @@ class PaymentFragment : Fragment() {
             datePicker.show()
         }
         binding.saveBtn.setOnClickListener {
-            if (binding.name.text.isEmpty() ||
+            if (saving || binding.name.text.isEmpty() ||
                 binding.value.text.isEmpty() ||
                 binding.date.text.isEmpty()) return@setOnClickListener
             var payment: Payment? = null
@@ -117,11 +122,26 @@ class PaymentFragment : Fragment() {
                 val endDate = LocalDate.of(cuttedEndDate[1].toInt(), cuttedEndDate[0].toInt(), cuttedDate[0].toInt())
                 payment.lastTime = endDate
             }
-            if (selectedIndex == -1) activity.payments.add(payment)
-            if (activity.payments.size > 1)
-                activity.payments = PaymentUtil.sortPayments(activity.payments).toList() as ArrayList<Payment>
-            activity.save()
-            findNavController().navigateUp()
+            saving = true
+            binding.saveBtn.text = "Calculating..."
+            GlobalScope.launch(Dispatchers.IO) {
+                var stayingPositive = true
+                if (payment.value!! < 0f)
+                    stayingPositive = PaymentUtil.testPayment(payment, activity.payments, activity.todayCash)
+                saving = false
+                withContext(Dispatchers.Main) {
+                    if (stayingPositive) {
+                        if (selectedIndex == -1) activity.payments.add(payment)
+                        if (activity.payments.size > 1)
+                            activity.payments = PaymentUtil.sortPayments(activity.payments).toList() as ArrayList<Payment>
+                        activity.save()
+                        findNavController().navigateUp()
+                    }
+                    else {
+                        binding.saveBtn.text = "Not possible"
+                    }
+                }
+            }
         }
         if(arguments != null)
             selectedIndex = requireArguments().getInt("index", -1)

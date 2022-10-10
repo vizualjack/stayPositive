@@ -52,7 +52,7 @@ class OverlayFragment : Fragment() {
     private fun load() {
         val activity = activity as MainActivity
         GlobalScope.launch(Dispatchers.IO) {
-            activity.todayCash = PaymentUtil.calculateTillDate(LocalDate.now(), activity.payments, activity.todayCash, false)
+            activity.todayCash = PaymentUtil.calculatePast(activity.payments, activity.todayCash)
             activity.save()
             loadMore()
             withContext(Dispatchers.Main) {
