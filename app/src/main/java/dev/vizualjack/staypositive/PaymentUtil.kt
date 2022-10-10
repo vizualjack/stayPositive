@@ -27,6 +27,54 @@ class PaymentUtil {
             return timeline
         }
 
+        fun calculatePast(payments: ArrayList<Payment>, todayCash: Float): Float {
+            val date = LocalDate.now()
+            val finishedPayments = ArrayList<Payment>()
+            var newCash = todayCash
+            for (payment in payments) {
+                if (payment.nextTime!! >= date) continue
+                when (payment.type) {
+                    PaymentType.ONES -> {
+                        newCash += payment.value!!
+                        finishedPayments.add(payment)
+                    }
+                    PaymentType.MONTHLY -> {
+                        var monthDifference = 0
+                        if (payment.lastTime != null && payment.lastTime!! < date) {
+                            val lastTime = payment.lastTime!!
+                            val period = Period.between(payment.nextTime!!, lastTime)
+                            monthDifference = period.years * 12
+                            monthDifference += period.months
+                            monthDifference += 1
+                            finishedPayments.add(payment)
+                        }
+                        else {
+                            val period = Period.between(payment.nextTime!!, date)
+                            monthDifference = period.years * 12
+                            monthDifference += period.months
+                            var newNextTime = payment.nextTime!!.withMonth(date.monthValue).withYear(date.year)
+                            if (newNextTime < date) {
+                                monthDifference += 1
+                                newNextTime = newNextTime.plusMonths(1)
+                            }
+                            payment.nextTime = newNextTime
+                        }
+                        newCash += (payment.value!! * monthDifference)
+                    }
+                    else -> {}
+                }
+            }
+            for (finishedPayment in finishedPayments)
+                payments.remove(finishedPayment)
+            return newCash
+        }
+
+        fun testPayment(testingPayment: Payment, currentPayments: ArrayList<Payment>, startCash: Float): Boolean {
+            val testingPayments = arrayListOf<Payment>(testingPayment)
+            testingPayments.addAll(currentPayments)
+            return checkForStayingPositive(testingPayments, startCash)
+        }
+
         private fun getLastPossibleDate(payments: List<Payment>): LocalDate {
             var lastPossibleDate = LocalDate.now()
             for (payment in payments) {
@@ -60,76 +108,21 @@ class PaymentUtil {
                             .withYear(localDate.year)
                             .withMonth(localDate.monthValue)
                             .compareTo(localDate) == 0
-                    }
-                    else false
+                    } else false
                 }
                 else -> false
             }
         }
 
-        fun calculateTillDate(date: LocalDate, payments: ArrayList<Payment>, todayCash: Float, test: Boolean): Float {
-            val finishedPayments = ArrayList<Payment>()
-            var newCash = todayCash
-            for (payment in payments) {
-                if (payment.nextTime!! >= date) continue
-                when (payment.type) {
-                    PaymentType.ONES -> {
-                        newCash += payment.value!!
-                        finishedPayments.add(payment)
-                    }
-                    PaymentType.MONTHLY -> {
-                        var monthDifference = 0
-                        if (payment.lastTime != null && payment.lastTime!! < date) {
-                            val lastTime = payment.lastTime!!
-                            val period = Period.between(payment.nextTime!!, lastTime)
-                            monthDifference = period.years * 12
-                            monthDifference += period.months
-                            monthDifference += 1
-                            finishedPayments.add(payment)
-                        }
-                        else {
-                            val period = Period.between(payment.nextTime!!, date)
-                            monthDifference = period.years * 12
-                            monthDifference += period.months
-                            var newNextTime = payment.nextTime!!.withMonth(date.monthValue).withYear(date.year)
-                            if (newNextTime < date) {
-                                monthDifference += 1
-                                newNextTime = newNextTime.plusMonths(1)
-                            }
-                            if (!test) payment.nextTime = newNextTime
-                        }
-                        newCash += (payment.value!! * monthDifference)
-                    }
-                    else -> {}
-                }
-                if (test && newCash < 0f) return newCash
-            }
-            if (!test) {
-                for (finishedPayment in finishedPayments)
-                    payments.remove(finishedPayment)
-            }
-            return newCash
-        }
-
-        fun testPayment(testingPayment: Payment, currentPayments: ArrayList<Payment>, startCash: Float): Boolean {
-            val testingPayments = arrayListOf<Payment>(testingPayment)
-            testingPayments.addAll(currentPayments)
-            if (testingPayment.type!! == PaymentType.MONTHLY && testingPayment.lastTime == null) {
-                val monthlyCash = calculateMonthlyCash(testingPayments)
-                if (monthlyCash < 0f) return false
-            }
-            return checkForStayingPositive(getLastChangePaymentDate(testingPayments).plusMonths(1), testingPayments, startCash)
-        }
-
-        private fun calculateMonthlyCash(payments: ArrayList<Payment>): Float {
-            var monthlyCash = 0f
-            for (payment in payments) {
-                if (payment.type == PaymentType.ONES) continue
-                if (payment.lastTime != null) continue
-                monthlyCash += payment.value!!
-            }
-            return monthlyCash
-        }
+//        private fun calculateMonthlyCash(payments: ArrayList<Payment>): Float {
+//            var monthlyCash = 0f
+//            for (payment in payments) {
+//                if (payment.type == PaymentType.ONES) continue
+//                if (payment.lastTime != null) continue
+//                monthlyCash += payment.value!!
+//            }
+//            return monthlyCash
+//        }
 
         private fun getLastChangePaymentDate(payments: ArrayList<Payment>): LocalDate {
             var lastPossibleDate = LocalDate.now()
@@ -146,10 +139,24 @@ class PaymentUtil {
             return lastPossibleDate
         }
 
-        private fun checkForStayingPositive(untilDate: LocalDate, testingPayments: ArrayList<Payment>, startCash: Float): Boolean {
-            val endDate = untilDate.plusDays(1)
-            val newCash = calculateTillDate(endDate, testingPayments, startCash, true)
+        private fun checkForStayingPositive(testingPayments: ArrayList<Payment>, startCash: Float): Boolean {
+            val endDate = getLastChangePaymentDate(testingPayments)!!.plusMonths(1).plusDays(1)
+            val newCash = simulateCashFlow(endDate, testingPayments, startCash)
             return newCash >= 0f
         }
+
+        private fun simulateCashFlow(endDate: LocalDate, payments: ArrayList<Payment>, startCash: Float): Float {
+            var date = LocalDate.now()
+            var cash = startCash
+            while (date < endDate) {
+                for (timelineEntry in getPaymentsForDay(payments, date)) {
+                    cash += timelineEntry.payment.value!!
+                }
+                if (cash < 0f) break
+                date = date.plusDays(1)
+            }
+            return cash
+        }
+
     }
 }
