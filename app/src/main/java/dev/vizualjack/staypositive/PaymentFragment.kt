@@ -109,7 +109,7 @@ class PaymentFragment : Fragment() {
                 binding.value.text.isEmpty() ||
                 binding.date.text.isEmpty()) return@setOnClickListener
             var payment: Payment? = null
-            if (selectedIndex != -1) payment = activity.payments[selectedIndex]
+            if (selectedIndex != -1) payment = activity.selectedAccount!!.payments!![selectedIndex]
             if (payment == null) payment = Payment(null,null, null,null, null)
             payment.name = binding.name.text.toString()
             payment.value = binding.value.text.toString().toFloat()
@@ -127,13 +127,13 @@ class PaymentFragment : Fragment() {
             GlobalScope.launch(Dispatchers.IO) {
                 var stayingPositive = true
                 if (payment.value!! < 0f)
-                    stayingPositive = PaymentUtil.testPayment(payment, activity.payments, activity.todayCash)
+                    stayingPositive = PaymentUtil.testPayment(payment, activity.selectedAccount!!.payments!!, activity.selectedAccount!!.cash!!)
                 saving = false
                 withContext(Dispatchers.Main) {
                     if (stayingPositive) {
-                        if (selectedIndex == -1) activity.payments.add(payment)
-                        if (activity.payments.size > 1)
-                            activity.payments = PaymentUtil.sortPayments(activity.payments).toList() as ArrayList<Payment>
+                        if (selectedIndex == -1) activity.selectedAccount!!.payments!!.add(payment)
+                        if (activity.selectedAccount!!.payments!!.size > 1)
+                            activity.selectedAccount!!.payments = PaymentUtil.sortPayments(activity.selectedAccount!!.payments!!).toList() as ArrayList<Payment>
                         activity.save()
                         findNavController().navigateUp()
                     }
@@ -148,10 +148,10 @@ class PaymentFragment : Fragment() {
         if (selectedIndex == -1) return
         binding.deleteBtn.alpha = 1f
         binding.deleteBtn.setOnClickListener {
-            activity.payments.removeAt(selectedIndex)
+            activity.selectedAccount!!.payments!!.removeAt(selectedIndex)
             findNavController().navigateUp()
         }
-        val entry = activity.payments[selectedIndex]
+        val entry = activity.selectedAccount!!.payments!![selectedIndex]
         binding.type.setSelection(entry.type!!.ordinal)
         binding.name.text.insert(0, entry.name)
         changeYpos(R.id.nameText, -30f)

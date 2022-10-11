@@ -4,9 +4,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -34,12 +32,15 @@ class OverlayFragment : Fragment() {
     private var entryHeight = 0
     private var previousIndex = 0
     private var isLoadingMore = false
+    private var mainActivity: MainActivity? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentOverlayBinding.inflate(inflater, container, false)
+        mainActivity = activity as MainActivity
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -50,14 +51,11 @@ class OverlayFragment : Fragment() {
     }
 
     private fun load() {
-        val activity = activity as MainActivity
         GlobalScope.launch(Dispatchers.IO) {
-            activity.todayCash = PaymentUtil.calculatePast(activity.payments, activity.todayCash)
-            activity.save()
             loadMore()
             withContext(Dispatchers.Main) {
-                var cashText =  "${Util.toNiceString(activity.todayCash, true)} €"
-                if (activity.todayCash < 0) cashText = "- ${cashText}"
+                var cashText =  "${Util.toNiceString(mainActivity!!.selectedAccount!!.cash!!, true)} €"
+                if (mainActivity!!.selectedAccount!!.cash!! < 0) cashText = "- ${cashText}"
                 binding.cash.text = cashText
             }
         }
@@ -70,9 +68,9 @@ class OverlayFragment : Fragment() {
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
                     if(input.text.isEmpty()) return@OnClickListener
-                    activity.todayCash = input.text.toString().toFloat()
-                    binding.cash.text = "${Util.toNiceString(activity.todayCash, true)} €"
-                    activity.save()
+                    mainActivity!!.selectedAccount!!.cash = input.text.toString().toFloat()
+                    binding.cash.text = "${Util.toNiceString(mainActivity!!.selectedAccount!!.cash!!, true)} €"
+                    mainActivity!!.save()
                 })
             builder.setNegativeButton("Cancel",
                 DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
@@ -94,7 +92,7 @@ class OverlayFragment : Fragment() {
             if (currentHeight >= triggerHeight) loadMore()
             if(currentIndex == previousIndex) return@setOnScrollChangeListener
             previousIndex = currentIndex
-            var cash = activity.todayCash
+            var cash = mainActivity!!.selectedAccount!!.cash!!
             for (i in 0 until currentIndex) {
                 cash += timelineEntries[i].payment.value!!
             }
@@ -107,11 +105,10 @@ class OverlayFragment : Fragment() {
     private fun loadMore() {
         if (isLoadingMore) return
         isLoadingMore = true
-        val activity = activity as MainActivity
         GlobalScope.launch(Dispatchers.IO) {
             var localDate = LocalDate.now()
             if (timelineEntries.size > 0) localDate = timelineEntries.last().currentTime.plusDays(1)
-            val newEntries = PaymentUtil.createPaymentTimeline(activity.payments, localDate,20)
+            val newEntries = PaymentUtil.createPaymentTimeline(mainActivity!!.selectedAccount!!.payments!!, localDate,20)
             timelineEntries.addAll(newEntries)
             val newViews = viewsForTimelineEntries(newEntries)
             withContext(Dispatchers.Main) {
@@ -122,7 +119,6 @@ class OverlayFragment : Fragment() {
     }
 
     private fun viewsForTimelineEntries(timelineEntries: List<PaymentTimelineEntry>): List<View> {
-        val activity = activity as MainActivity
         val views = ArrayList<View>()
         for (timelineEntry in timelineEntries) {
             val newEntry = LayoutInflater.from(context).inflate(R.layout.fragment_overlay_payment, null)
@@ -142,7 +138,7 @@ class OverlayFragment : Fragment() {
             cashView.text = "$preSign $cashViewText €"
             cashView.setTextColor(resources.getColor(colorId, null))
             newEntry.setOnClickListener {
-                val index = activity.payments.indexOf(timelineEntry.payment)
+                val index = mainActivity!!.selectedAccount!!.payments!!.indexOf(timelineEntry.payment)
                 val bundle = bundleOf("index" to index)
                 findNavController().navigate(R.id.action_OverlayFragment_to_EntryFragment, bundle)
             }
@@ -164,5 +160,60 @@ class OverlayFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_main, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_rename -> {
+                renamePopup()
+                true
+            }
+            R.id.menu_delete -> {
+                deletePopup()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun renamePopup() {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("AccountName")
+        val input = EditText(context)
+        input.setText(mainActivity!!.selectedAccount!!.name)
+        builder.setView(input)
+        builder.setPositiveButton("OK",
+            DialogInterface.OnClickListener { dialog, which ->
+                if(input.text.isEmpty()) return@OnClickListener
+                val accountName = input.text.toString()
+                if (mainActivity!!.selectedAccount == null) return@OnClickListener
+                mainActivity!!.selectedAccount!!.name = accountName
+                mainActivity!!.save()
+            })
+        builder.setNegativeButton("Cancel",
+            DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+        builder.show()
+    }
+
+    private fun deletePopup() {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Account deletion")
+        val question = TextView(context)
+        question.textSize = question.textSize/2.2f
+        question.text = "   Do you really want to delete this account?"
+        builder.setView(question)
+        builder.setPositiveButton("Yes",
+            DialogInterface.OnClickListener { dialog, which ->
+                mainActivity!!.accounts.remove(mainActivity!!.selectedAccount!!)
+                mainActivity!!.save()
+                findNavController().navigateUp()
+            })
+        builder.setNegativeButton("No",
+            DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+        builder.show()
     }
 }
