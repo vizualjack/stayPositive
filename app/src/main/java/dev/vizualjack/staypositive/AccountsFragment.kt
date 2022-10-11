@@ -58,7 +58,7 @@ class AccountsFragment : Fragment() {
 
     private fun namePopup(value: String?) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("AccountName")
+        builder.setTitle("Enter account name")
         val input = EditText(context)
         if (value != null) input.setText(value)
         builder.setView(input)

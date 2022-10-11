@@ -81,6 +81,8 @@ class PaymentFragment : Fragment() {
             val filled = activity.findViewById<EditText>(R.id.value).text.toString().isNotEmpty()
             if (focus || filled) value = -30f
             changeYpos(R.id.valueText, value)
+            if (focus) return@setOnFocusChangeListener
+            binding.value.setText(getCash().toString())
         }
         binding.date.setOnClickListener {
             hideKeyboard()
@@ -112,7 +114,7 @@ class PaymentFragment : Fragment() {
             if (selectedIndex != -1) payment = activity.selectedAccount!!.payments!![selectedIndex]
             if (payment == null) payment = Payment(null,null, null,null, null)
             payment.name = binding.name.text.toString()
-            payment.value = binding.value.text.toString().toFloat()
+            payment.value = getCash()
             payment.type = PaymentType.values()[binding.type.selectedItemPosition]
             val cuttedDate = binding.date.text.toString().split('.')
             val date = LocalDate.of(cuttedDate[2].toInt(), cuttedDate[1].toInt(), cuttedDate[0].toInt())
@@ -161,13 +163,21 @@ class PaymentFragment : Fragment() {
         changeYpos(R.id.valueText, -30f)
         binding.date.text = Util.toNiceString(entry.nextTime!!)
         changeYpos(R.id.dateText, -30f)
-        if (entry.lastTime != null)
+        if (entry.lastTime != null) {
             binding.endDate.text = Util.toNiceString(entry.lastTime!!).substring(3)
             changeYpos(R.id.endDateText, -30f)
+        }
+    }
+
+    private fun getCash(): Float {
+        var newCash = binding.value.text.toString().toFloat()
+        if (newCash > 9999999f) newCash = 9999999f
+        else if (newCash < -9999999f) newCash = -9999999f
+        return newCash
     }
 
     fun hideKeyboard() {
-        requireView().findFocus()
+        requireView().clearFocus()
         val imm: InputMethodManager? = getSystemService(requireContext(), InputMethodManager::class.java)
         imm!!.hideSoftInputFromWindow(requireView().windowToken, 0)
     }

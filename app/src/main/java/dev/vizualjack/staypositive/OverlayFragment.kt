@@ -25,8 +25,6 @@ class OverlayFragment : Fragment() {
 
     private var _binding: FragmentOverlayBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private var timelineEntries = ArrayList<PaymentTimelineEntry>()
     private var entryHeight = 0
@@ -68,7 +66,9 @@ class OverlayFragment : Fragment() {
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
                     if(input.text.isEmpty()) return@OnClickListener
-                    mainActivity!!.selectedAccount!!.cash = input.text.toString().toFloat()
+                    var newCash = input.text.toString().toFloat()
+                    if (newCash > 9999999f) newCash = 9999999f
+                    mainActivity!!.selectedAccount!!.cash = newCash
                     binding.cash.text = "${Util.toNiceString(mainActivity!!.selectedAccount!!.cash!!, true)} €"
                     mainActivity!!.save()
                 })
@@ -182,7 +182,7 @@ class OverlayFragment : Fragment() {
 
     private fun renamePopup() {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("AccountName")
+        builder.setTitle("Enter account name")
         val input = EditText(context)
         input.setText(mainActivity!!.selectedAccount!!.name)
         builder.setView(input)
