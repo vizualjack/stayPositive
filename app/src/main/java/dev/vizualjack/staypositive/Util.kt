@@ -1,9 +1,18 @@
 package dev.vizualjack.staypositive
 
+import java.text.DecimalFormat
 import java.time.LocalDate
 
 class Util {
     companion object {
+        val decimalFormat = DecimalFormat("##.00")
+        fun roundToCashLikeValue(value: Float): Float {
+            var cash = decimalFormat.format(value).toFloat()
+            if (cash > 9999999f) cash = 9999999f
+            else if (cash < -9999999f) cash = -9999999f
+            return cash
+        }
+
         fun toNiceString(value: Float, withSpaces: Boolean): String {
             var asString = value.toString().replace("-", "").replace("+", "")
             var pointIndex = asString.indexOf('.')
@@ -28,11 +37,11 @@ class Util {
             return "${double(value.dayOfMonth)}.${double(value.monthValue)}.${value.year}"
         }
 
-        fun double(value: Int): String {
+        private fun double(value: Int): String {
             return double(value.toString())
         }
 
-        fun double(value: String): String {
+        private fun double(value: String): String {
             if (value.length < 2) return "0$value"
             return value
         }

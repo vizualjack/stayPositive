@@ -27,8 +27,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         load()
-        for (account in accounts)
+        for (account in accounts) {
             account.cash = PaymentUtil.calculatePast(account.payments!!, account.cash!!)
+            account.cash = Util.roundToCashLikeValue(account.cash!!)
+        }
         save()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

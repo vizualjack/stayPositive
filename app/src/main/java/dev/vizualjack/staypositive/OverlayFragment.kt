@@ -66,9 +66,7 @@ class OverlayFragment : Fragment() {
             builder.setPositiveButton("OK",
                 DialogInterface.OnClickListener { dialog, which ->
                     if(input.text.isEmpty()) return@OnClickListener
-                    var newCash = input.text.toString().toFloat()
-                    if (newCash > 9999999f) newCash = 9999999f
-                    mainActivity!!.selectedAccount!!.cash = newCash
+                    mainActivity!!.selectedAccount!!.cash = Util.roundToCashLikeValue(input.text.toString().toFloat())
                     binding.cash.text = "${Util.toNiceString(mainActivity!!.selectedAccount!!.cash!!, true)} €"
                     mainActivity!!.save()
                 })
@@ -96,6 +94,7 @@ class OverlayFragment : Fragment() {
             for (i in 0 until currentIndex) {
                 cash += timelineEntries[i].payment.value!!
             }
+            cash = Util.roundToCashLikeValue(cash)
             var cashText =  "${Util.toNiceString(cash, true)} €"
             if (cash < 0) cashText = "- ${cashText}"
             binding.cash.text = cashText

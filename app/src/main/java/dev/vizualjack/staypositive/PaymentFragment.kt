@@ -4,7 +4,6 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,17 +77,19 @@ class PaymentFragment : Fragment() {
         }
         binding.value.setOnFocusChangeListener { view, focus ->
             var value = 0f
-            val filled = activity.findViewById<EditText>(R.id.value).text.toString().isNotEmpty()
+            if (!focus) binding.value.setText(getCash().toString())
+            val valueString = activity.findViewById<EditText>(R.id.value).text.toString()
+            val filled = valueString.isNotEmpty()
             if (focus || filled) value = -30f
             changeYpos(R.id.valueText, value)
-            if (focus) return@setOnFocusChangeListener
-            binding.value.setText(getCash().toString())
+            if (focus && filled && valueString.toFloat() == 0f) binding.value.setText("")
         }
         binding.date.setOnClickListener {
             hideKeyboard()
             val datePicker = DatePickerDialog(requireContext())
             datePicker.setOnDateSetListener { datePicker, year, month, day ->
-                val localDate = LocalDate.of(datePicker.year,datePicker.month+1,datePicker.dayOfMonth)
+                var localDate = LocalDate.of(datePicker.year,datePicker.month+1,datePicker.dayOfMonth)
+                if(localDate < LocalDate.now()) localDate = LocalDate.now()
                 binding.date.text = Util.toNiceString(localDate)
                 changeYpos(R.id.dateText, -30f)
             }
@@ -101,6 +102,12 @@ class PaymentFragment : Fragment() {
             val datePicker = DatePickerDialog(requireContext())
             datePicker.setOnDateSetListener { datePicker, year, month, day ->
                 var localDate = LocalDate.of(datePicker.year,datePicker.month+1,datePicker.dayOfMonth)
+                if(localDate < LocalDate.now()) localDate = LocalDate.now()
+                if (binding.date.text != "") {
+                    val cutDate = binding.date.text.toString().split('.')
+                    val date = LocalDate.of(cutDate[2].toInt(), cutDate[1].toInt(), cutDate[0].toInt())
+                    if (date > localDate) localDate = date
+                }
                 binding.endDate.text = Util.toNiceString(localDate).substring(3)
                 changeYpos(R.id.endDateText, -30f)
             }
@@ -169,11 +176,10 @@ class PaymentFragment : Fragment() {
         }
     }
 
-    private fun getCash(): Float {
-        var newCash = binding.value.text.toString().toFloat()
-        if (newCash > 9999999f) newCash = 9999999f
-        else if (newCash < -9999999f) newCash = -9999999f
-        return newCash
+    private fun getCash(): Float? {
+        var cashText = binding.value.text.toString()
+        if (cashText == "") cashText = "0"
+        return Util.roundToCashLikeValue(cashText.toFloat())
     }
 
     fun hideKeyboard() {
