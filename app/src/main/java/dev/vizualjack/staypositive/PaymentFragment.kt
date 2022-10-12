@@ -117,32 +117,31 @@ class PaymentFragment : Fragment() {
             if (saving || binding.name.text.isEmpty() ||
                 binding.value.text.isEmpty() ||
                 binding.date.text.isEmpty()) return@setOnClickListener
-            var payment: Payment? = null
-            if (selectedIndex != -1) payment = activity.selectedAccount!!.payments!![selectedIndex]
-            if (payment == null) payment = Payment(null,null, null,null, null)
-            payment.name = binding.name.text.toString()
-            payment.value = getCash()
-            payment.type = PaymentType.values()[binding.type.selectedItemPosition]
-            val cuttedDate = binding.date.text.toString().split('.')
-            val date = LocalDate.of(cuttedDate[2].toInt(), cuttedDate[1].toInt(), cuttedDate[0].toInt())
-            payment.nextTime = date
+            var testPayment = Payment(binding.name.text.toString(),getCash(),
+                null,null, PaymentType.values()[binding.type.selectedItemPosition])
+            val cutDate = binding.date.text.toString().split('.')
+            val date = LocalDate.of(cutDate[2].toInt(), cutDate[1].toInt(), cutDate[0].toInt())
+            testPayment.nextTime = date
             if (binding.endDate.text != "") {
                 val cuttedEndDate = binding.endDate.text.toString().split('.')
-                val endDate = LocalDate.of(cuttedEndDate[1].toInt(), cuttedEndDate[0].toInt(), cuttedDate[0].toInt())
-                payment.lastTime = endDate
+                val endDate = LocalDate.of(cuttedEndDate[1].toInt(), cuttedEndDate[0].toInt(), cutDate[0].toInt())
+                testPayment.lastTime = endDate
             }
             saving = true
             binding.saveBtn.text = "Calculating..."
             GlobalScope.launch(Dispatchers.IO) {
+                var payments = ArrayList<Payment>()
+                payments.addAll(activity.selectedAccount!!.payments!!)
+                if (selectedIndex != -1) payments.remove(activity.selectedAccount!!.payments!![selectedIndex])
                 var stayingPositive = true
-                if (payment.value!! < 0f)
-                    stayingPositive = PaymentUtil.testPayment(payment, activity.selectedAccount!!.payments!!, activity.selectedAccount!!.cash!!)
+                if (testPayment.value!! < 0f)
+                    stayingPositive = PaymentUtil.testPayment(testPayment, payments, activity.selectedAccount!!.cash!!)
                 saving = false
                 withContext(Dispatchers.Main) {
                     if (stayingPositive) {
-                        if (selectedIndex == -1) activity.selectedAccount!!.payments!!.add(payment)
-                        if (activity.selectedAccount!!.payments!!.size > 1)
-                            activity.selectedAccount!!.payments = PaymentUtil.sortPayments(activity.selectedAccount!!.payments!!).toList() as ArrayList<Payment>
+                        payments.add(testPayment)
+                        if (payments.size > 1) payments = PaymentUtil.sortPayments(payments).toList() as ArrayList<Payment>
+                        activity.selectedAccount!!.payments = payments
                         activity.save()
                         findNavController().navigateUp()
                     }
