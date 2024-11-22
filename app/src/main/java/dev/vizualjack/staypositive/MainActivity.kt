@@ -112,41 +112,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    public fun Oldsave() {
-//        val entryArray = JSONArray()
-//        for (entry in payments) {
-//            val arrayEntry = JSONObject()
-//            arrayEntry.put("name", entry.name)
-//            arrayEntry.put("value", entry.value)
-//            arrayEntry.put("nextTime", entry.nextTime)
-//            arrayEntry.put("lastTime", entry.lastTime)
-//            arrayEntry.put("type", entry.type!!.ordinal)
-//            entryArray.put(arrayEntry)
-//        }
-//        val dataJson = JSONObject()
-//        dataJson.put("todayCash", todayCash)
-//        dataJson.put("entries", entryArray)
-//        baseContext.openFileOutput(SAVE_FILE_NAME, Context.MODE_PRIVATE).use {
-//            it?.write(dataJson.toString().toByteArray())
-//        }
-//    }
-
-//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        menuInflater.inflate(R.menu.menu_main, menu)
-//        return true
-//    }
-
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-////        return when (item.itemId) {
-////            R.id.action_settings -> true
-////            else -> super.onOptionsItemSelected(item)
-////        }
-//    }
-
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
